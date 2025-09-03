@@ -113,7 +113,7 @@ async def fetch_pwwp_data(session: aiohttp.ClientSession, url: str, headers: Dic
             logging.exception(f"Attempt {attempt + 1} failed: Unexpected error fetching {url}: {e}")
 
         if attempt < max_retries - 1:
-            await asyncio.sleep(90 ** attempt)
+            await asyncio.sleep(5 ** attempt)
         else:
             logging.error(f"Failed to fetch {url} after {max_retries} attempts.")
             return None
