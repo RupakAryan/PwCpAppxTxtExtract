@@ -13,7 +13,6 @@ import base64
 from pyrogram import Client, filters
 import sys
 import re
-import requests
 import uuid
 import random
 import string
@@ -39,9 +38,12 @@ THREADPOOL = ThreadPoolExecutor(max_workers=1000)
 import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+# Add these for asyncio compatibility
+import nest_asyncio
+nest_asyncio.apply()
 
 # Bot credentials from environment variables (Render compatible)
-API_ID = int(os.environ.get("API_ID","29978901"))
+API_ID = int(os.environ.get("API_ID", "29978901"))
 API_HASH = os.environ.get("API_HASH", "500fc876c5356cf04ed3698912dc2edf")
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "8400419495:AAHPVhXaN4uKeiCGjvNGhic5S1SZWdH2YFc")
 
@@ -55,19 +57,31 @@ app = Flask(__name__)
 def home():
     return "Bot is running!"
 
+# Flask server ko alag thread mein run karne ka function
 def run_flask():
-    app.run(host="0.0.0.0", port=8080) #Use 8080 Port here, if you're deploying it on koyeb
-    
+    app.run(host="0.0.0.0", port=8080)  # Use 8080 port if you're deploying on Render
 
 image_list = [
-"https://graph.org/file/8b1f4146a8d6b43e5b2bc-be490579da043504d5.jpg",
-"https://graph.org/file/b75dab2b3f7eaff612391-282aa53538fd3198d4.jpg",
-"https://graph.org/file/38de0b45dd9144e524a33-0205892dd05593774b.jpg",
-"https://graph.org/file/be39f0eebb9b66d7d6bc9-59af2f46a4a8c510b7.jpg",
-"https://graph.org/file/8b7e3d10e362a2850ba0a-f7c7c46e9f4f50b10b.jpg",
+    "https://graph.org/file/8b1f4146a8d6b43e5b2bc-be490579da043504d5.jpg",
+    "https://graph.org/file/b75dab2b3f7eaff612391-282aa53538fd3198d4.jpg",
+    "https://graph.org/file/38de0b45dd9144e524a33-0205892dd05593774b.jpg",
+    "https://graph.org/file/be39f0eebb9b66d7d6bc9-59af2f46a4a8c510b7.jpg",
+    "https://graph.org/file/8b7e3d10e362a2850ba0a-f7c7c46e9f4f50b10b.jpg",
 ]
 print(4321)
 
+# Main code to run both Flask and Pyrogram together
+if __name__ == "__main__":
+    # Set up the asyncio event loop correctly
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    
+    # Flask ko alag thread mein run karna
+    flask_thread = threading.Thread(target=run_flask)
+    flask_thread.start()
+    
+    # Pyrogram bot ko start karna
+    bot.run()  # This starts the bot
 
 
 @bot.on_message(filters.command(["start"]))
